@@ -73,6 +73,11 @@ class Product
         return $this;
     }
 
+    public function __construct()
+    {
+        $this->dateCreation = new \DateTime();
+    }
+
     public function getDateCreation(): ?\DateTimeInterface
     {
         return $this->dateCreation;
