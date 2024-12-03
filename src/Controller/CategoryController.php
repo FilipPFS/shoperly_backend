@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class CategoryController extends AbstractController
 {
@@ -30,5 +31,45 @@ class CategoryController extends AbstractController
             'id' => $category->getId(),
             'name' => $category->getName(),
         ], Response::HTTP_CREATED);
+    }
+
+    #[Route('/api/categories/{id}', name: 'update_category', methods: ['PUT'])]
+    public function updateCategory($id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $category = $entityManager->getRepository(Category::class)->find($id);
+
+        if (!$category) {
+            return new JsonResponse(['message' => 'Category not found'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['name']) || empty($data['name'])) {
+            return $this->json(['error' => 'Category name is required'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $category->setName($data['name']);
+
+        $entityManager->flush();
+
+        return $this->json([
+            'id' => $category->getId(),
+            'name' => $category->getName(),
+        ], Response::HTTP_CREATED);
+    }
+
+    #[Route('/api/categories/{id}', name: 'delete_category', methods: ['DELETE'])]
+    public function deleteCategory($id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $category = $entityManager->getRepository(Category::class)->find($id);
+
+        if (!$category) {
+            return new JsonResponse(['message' => 'Category not found'], 404);
+        }
+
+        $entityManager->remove($category);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'Category deleted successfully'], 200);
     }
 }

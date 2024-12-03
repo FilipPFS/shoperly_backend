@@ -46,8 +46,11 @@ class ProductController extends AbstractController
     }
 
     #[Route('/api/products/{id}', name: 'update_product', methods: ['PUT'])]
-    public function updateProduct(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
+    public function updateProduct(
+        int $id,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
         $product = $entityManager->getRepository(Product::class)->find($id);
 
         if (!$product) {
@@ -67,10 +70,8 @@ class ProductController extends AbstractController
             }
         }
 
-        // Extract the category ID from the "categorie" field
-        $categorieId = (int) substr($data['category'], strrpos($data['category'], '/') + 1);
-
-        $category = $entityManager->getRepository(Category::class)->find($categorieId);
+        $categoryId = $data['category']['id'];
+        $category = $entityManager->getRepository(Category::class)->find($categoryId);
 
         if (!$category) {
             return new JsonResponse(['message' => 'Category not found'], 404);
@@ -82,20 +83,18 @@ class ProductController extends AbstractController
         $product->setPrice($data['price']);
 
         if (isset($data['dateCreation'])) {
-            $product->setDateCreation(new \DateTime($data['dateCreation']));
+            try {
+                $product->setDateCreation(new \DateTime($data['dateCreation']));
+            } catch (\Exception $e) {
+                return new JsonResponse(['message' => 'Invalid date format for dateCreation'], 400);
+            }
         }
 
         $entityManager->flush();
 
-        return new JsonResponse([
-            'id' => $product->getId(),
-            'name' => $product->getName(),
-            'description' => $product->getDescription(),
-            'price' => $product->getPrice(),
-            'dateCreation' => $product->getDateCreation()->format('Y-m-d H:i:s'),
-            'category' => '/api/categories/' . $category->getId(),
-        ]);
+        return $this->json($product, 200, [], ['groups' => ['product:read']]);
     }
+
 
     #[Route('/api/products/{id}', name: 'delete_product', methods: ['DELETE'])]
     public function deleteProduct($id, EntityManagerInterface $entityManager): JsonResponse
