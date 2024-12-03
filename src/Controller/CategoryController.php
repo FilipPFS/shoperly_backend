@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CategoryController extends AbstractController
 {
@@ -34,7 +35,7 @@ class CategoryController extends AbstractController
     }
 
     #[Route('/api/categories/{id}', name: 'update_category', methods: ['PUT'])]
-    public function updateCategory($id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function updateCategory($id, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
         $category = $entityManager->getRepository(Category::class)->find($id);
 
@@ -49,6 +50,17 @@ class CategoryController extends AbstractController
         }
 
         $category->setName($data['name']);
+
+        $errors = $validator->validate($category);
+
+        if (count($errors) > 0) {
+            $validationErrors = [];
+            foreach ($errors as $error) {
+                $validationErrors[] = $error->getMessage();
+            }
+
+            return new JsonResponse(['errors' => $validationErrors], Response::HTTP_BAD_REQUEST);
+        }
 
         $entityManager->flush();
 

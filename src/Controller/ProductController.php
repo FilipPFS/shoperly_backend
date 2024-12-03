@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProductController extends AbstractController
 {
@@ -49,7 +51,8 @@ class ProductController extends AbstractController
     public function updateProduct(
         int $id,
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator
     ): JsonResponse {
         $product = $entityManager->getRepository(Product::class)->find($id);
 
@@ -88,6 +91,16 @@ class ProductController extends AbstractController
             } catch (\Exception $e) {
                 return new JsonResponse(['message' => 'Invalid date format for dateCreation'], 400);
             }
+        }
+
+        $errors = $validator->validate($product);
+        if (count($errors) > 0) {
+            $validationErrors = [];
+            foreach ($errors as $error) {
+                $validationErrors[] = $error->getMessage();
+            }
+
+            return new JsonResponse(['violations' => $validationErrors], Response::HTTP_BAD_REQUEST);
         }
 
         $entityManager->flush();
