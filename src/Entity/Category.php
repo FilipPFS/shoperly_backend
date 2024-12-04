@@ -27,8 +27,8 @@ class Category
     #[Assert\Length(
         min: 3,
         max: 100,
-        minMessage: "The category name must be at least {{ limit }} characters long.",
-        maxMessage: "The category name cannot be longer than {{ limit }} characters."
+        minMessage: "Le nom de la catégorie doit contenir au minimum {{ limit }} charactères..",
+        maxMessage: "Le nom de la catégorie ne peut pas contenir plus de {{ limit }} charactères."
     )]
     private ?string $name = null;
 

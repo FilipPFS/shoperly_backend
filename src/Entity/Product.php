@@ -24,30 +24,30 @@ class Product
 
     #[ORM\Column(length: 255)]
     #[Groups(['product:read', 'product:write'])]
-    #[Assert\NotBlank(message: "Product name is required.")]
+    #[Assert\NotBlank(message: "Le nom est requis.")]
     #[Assert\Length(
         min: 3,
         max: 255,
-        minMessage: "Product name must be at least {{ limit }} characters long.",
-        maxMessage: "Product name cannot exceed {{ limit }} characters.",
+        minMessage: "Le nom du produit doit contenir au minimum {{ limit }} charactères.",
+        maxMessage: "Le nom du produit ne peut pas contenir plus de {{ limit }} charactères.",
     )]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['product:read', 'product:write'])]
-    #[Assert\NotBlank(message: "Product description is required.")]
+    #[Assert\NotBlank(message: "La description est recquise.")]
     #[Assert\Length(
         min: 10,
         max: 255,
-        minMessage: "Description must be at least {{ limit }} characters long.",
-        maxMessage: "Description cannot exceed {{ limit }} characters.",
+        minMessage: "La Description doit contenir au minimum {{ limit }} charactères.",
+        maxMessage: "La Description ne peut pas contenir plus de {{ limit }} charactères.",
     )]
     private ?string $description = null;
 
     #[ORM\Column]
     #[Groups(['product:read', 'product:write'])]
-    #[Assert\NotNull(message: "Price is required.")]
-    #[Assert\Positive(message: "Price must be a positive value.")]
+    #[Assert\NotNull(message: "Le prix est requis.")]
+    #[Assert\Positive(message: "Le prix doit être une valeur positive.")]
     private ?float $price = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -57,7 +57,7 @@ class Product
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['product:read', 'product:write'])]
-    #[Assert\NotNull(message: "Category is required.")]
+    #[Assert\NotNull(message: "La catégorie est requise.")]
     private ?Category $category = null;
 
     public function getId(): ?int
